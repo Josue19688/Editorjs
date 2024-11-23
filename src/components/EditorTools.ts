@@ -5,7 +5,7 @@ import Header from "@editorjs/header";
 import List from "@editorjs/list";
 import AlignmentBlockTune from "editorjs-text-alignment-blocktune"
 import Checklist from "@editorjs/checklist";
-import SimpleImage from "@editorjs/simple-image"
+import ImageTool from "@editorjs/image"
 import Embed from "@editorjs/embed"
 import Underline from "@editorjs/underline"
 import Strikethrough from "@sotaproject/strikethrough"
@@ -14,6 +14,28 @@ import InlineCode from "@editorjs/inline-code"
 import ChangeCase from "editorjs-change-case"
 import ColorPlugin from "editorjs-text-color-plugin"
 
+
+const customUploader = async (file) => {
+  const formData = new FormData();
+  formData.append('files', file); // Asegúrate de usar el campo esperado
+
+  const response = await fetch("http://localhost:3000/files/uploads/editor", {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error('Upload failed');
+  }
+
+  const data = await response.json();
+  return {
+    success: 1,
+    file: {
+      url: data.file.url, // Cambia según el formato de tu backend
+    },
+  };
+};
 
 export const EDITOR_JS_TOOLS = {
  
@@ -52,7 +74,12 @@ export const EDITOR_JS_TOOLS = {
       
     },
     image: {
-      class: SimpleImage,
+      class: ImageTool,
+      config: {
+        uploader: {
+          uploadByFile: customUploader, // Usa el adaptador personalizado
+        },
+      },
     },
     embed: {
       class: Embed,
